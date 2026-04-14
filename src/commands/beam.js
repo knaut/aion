@@ -56,8 +56,7 @@ export async function beamCommand(teamArg, opts = {}) {
   const spinner = beamSpinner(teamName, projectName).start();
 
   try {
-    team._homeRepo = homeRepo;
-    const deployed = await deployTeam(team, cwd, { forceClaude: opts.forceClaude });
+    const deployed = await deployTeam(team, cwd, homeRepo, { forceClaude: opts.forceClaude });
     setLastDeployed(cwd, [teamName]);
     spinner.succeed(theme.success(`🚀 Beamed ${teamName} to ${projectName}`));
     console.log(theme.muted(`   ${deployed.agents.length} agents, ${deployed.skills.length} skills`));
