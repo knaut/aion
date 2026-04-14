@@ -1,0 +1,42 @@
+{
+  "name": "aion",
+  "version": "0.1.0",
+  "description": "Agent, skills, and sub-agent team manager for Claude Code",
+  "type": "module",
+  "bin": {
+    "aion": "./bin/aion.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node bin/aion.js",
+    "lint": "eslint src bin",
+    "format": "prettier --write src bin"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "conf": "^13.1.0",
+    "fast-glob": "^3.3.3",
+    "figlet": "^1.8.0",
+    "fs-extra": "^11.3.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.7.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0"
+  },
+  "keywords": [
+    "claude",
+    "agents",
+    "cli",
+    "tui"
+  ],
+  "license": "MIT"
+}
