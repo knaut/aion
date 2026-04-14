@@ -3,22 +3,43 @@ import { readFileSync } from 'fs';
 import { join, basename, dirname, relative } from 'path';
 
 // Simple YAML frontmatter parser (avoids a full yaml dep)
+// Handles: scalar strings, bracket arrays, and folded block scalars (>)
 function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
-  const raw = match[1];
+  const lines = match[1].split(/\r?\n/);
   const result = {};
-  for (const line of raw.split(/\r?\n/)) {
-    const [key, ...rest] = line.split(':');
-    if (key && rest.length) {
-      const val = rest.join(':').trim();
-      if (val.startsWith('[') && val.endsWith(']')) {
-        result[key.trim()] = val.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
-      } else {
-        result[key.trim()] = val;
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1 || line.startsWith(' ')) { i++; continue; }
+
+    const key = line.slice(0, colonIdx).trim();
+    const rest = line.slice(colonIdx + 1).trim();
+
+    // Folded (>) or literal (|) block scalar — collect indented lines that follow
+    if (rest === '>' || rest === '|') {
+      const blocks = [];
+      i++;
+      while (i < lines.length && (lines[i].startsWith(' ') || lines[i] === '')) {
+        blocks.push(lines[i].trim());
+        i++;
       }
+      result[key] = blocks.join(' ').trim();
+      continue;
     }
+
+    // Bracket array: [a, b, c]
+    if (rest.startsWith('[') && rest.endsWith(']')) {
+      result[key] = rest.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
+    } else {
+      result[key] = rest;
+    }
+    i++;
   }
+
   return result;
 }
 

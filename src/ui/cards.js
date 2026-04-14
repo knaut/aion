@@ -1,12 +1,19 @@
 import boxen from 'boxen';
 import { theme } from './theme.js';
 
+// Frontmatter tools can be a comma-separated string or already an array
+function toArray(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  return val.split(',').map(s => s.trim()).filter(Boolean);
+}
+
 /** Render a terse agent profile card */
 export function agentCard(agent) {
   const lines = [
     `${theme.accent(agent.name)}  ${theme.muted(`[${agent.team}]`)}`,
     `${theme.muted('model:')}  ${agent.frontmatter?.model ?? theme.muted('unset')}`,
-    `${theme.muted('tools:')}  ${(agent.frontmatter?.tools ?? []).join(', ') || theme.muted('none')}`,
+    `${theme.muted('tools:')}  ${toArray(agent.frontmatter?.tools).join(', ') || theme.muted('none')}`,
   ];
 
   if (agent.frontmatter?.description) {
