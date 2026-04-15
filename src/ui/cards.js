@@ -28,6 +28,25 @@ export function agentCard(agent) {
   });
 }
 
+/** Render a skill profile card */
+export function skillCard(skill) {
+  const lines = [
+    `${theme.primary(skill.name)}  ${theme.muted(`[${skill.team}]`)}`,
+    theme.muted('type:   skill'),
+  ];
+
+  if (skill.description) {
+    lines.push('');
+    lines.push(theme.muted(skill.description));
+  }
+
+  return boxen(lines.join('\n'), {
+    padding: 1,
+    borderStyle: 'round',
+    borderColor: 'cyan',
+  });
+}
+
 /** Render a team roster panel */
 export function teamCard(team) {
   const agentNames = team.agents.map(a => theme.accent(a.name)).join(', ') || theme.muted('none');

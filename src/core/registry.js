@@ -98,7 +98,7 @@ export async function buildRegistry(homeRepo) {
     const agent = { name, team: teamName, filePath, frontmatter };
     teamsMap[teamName].agents.push(agent);
 
-    if (!teamsMap[teamName].director && frontmatter.director === 'true') {
+    if (!teamsMap[teamName].director && (frontmatter.director === 'true' || name === 'picard')) {
       teamsMap[teamName].director = agent;
     }
   }

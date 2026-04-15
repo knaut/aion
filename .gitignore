@@ -1,7 +1,6 @@
+.sim/
+CLAUDE.md
 node_modules/
 .claude/
 .DS_Store
 *.log
-CLAUDE.md
-PLANS
-REPORTS
