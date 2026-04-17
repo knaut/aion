@@ -53,6 +53,8 @@ agents/
 
 Each agent is a standard Claude Code agent `.md` file with YAML frontmatter (`name`, `description`, `model`, `tools`). Skills are directories containing a `SKILL.md`.
 
+If you have additional directories in /agents/ that are not teams, drop an .aionignore file in your local project directory with those directory names, one per line, and aion won't scan them.
+
 ---
 
 ## Commands

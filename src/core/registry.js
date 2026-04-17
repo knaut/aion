@@ -1,10 +1,10 @@
 import fg from 'fast-glob';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join, basename, dirname, relative } from 'path';
 
 // Simple YAML frontmatter parser (avoids a full yaml dep)
 // Handles: scalar strings, bracket arrays, and folded block scalars (>)
-function parseFrontmatter(content) {
+export function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
   const lines = match[1].split(/\r?\n/);
@@ -35,7 +35,14 @@ function parseFrontmatter(content) {
     if (rest.startsWith('[') && rest.endsWith(']')) {
       result[key] = rest.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean);
     } else {
-      result[key] = rest;
+      // Normalize boolean-like strings to actual booleans
+      if (rest.toLowerCase() === 'true') {
+        result[key] = true;
+      } else if (rest.toLowerCase() === 'false') {
+        result[key] = false;
+      } else {
+        result[key] = rest;
+      }
     }
     i++;
   }
@@ -58,19 +65,31 @@ let _cache = null;
 export async function buildRegistry(homeRepo) {
   if (_cache) return _cache;
 
+  // Load .aionignore if it exists — allows users to exclude directories from scanning
+  const aionignorePath = join(homeRepo, '.aionignore');
+  const userIgnores = [];
+  if (existsSync(aionignorePath)) {
+    const ignoreContent = readFileSync(aionignorePath, 'utf8');
+    for (const line of ignoreContent.split(/\r?\n/)) {
+      const trimmed = line.trim().replace(/\/+$/, '');
+      if (trimmed === '' || trimmed.startsWith('#')) continue;
+      userIgnores.push(`${trimmed}/**`);
+    }
+  }
+
   // Agents: direct .md files inside top-level team directories
   // Pattern *\/*.md matches <team>/<agent>.md only (no nesting)
   const agentFiles = await fg('*/*.md', {
     cwd: homeRepo,
     absolute: true,
-    ignore: ['**/node_modules/**', '**/skills/**'],
+    ignore: ['**/node_modules/**', '**/skills/**', ...userIgnores],
   });
 
   // Skills: SKILL.md files inside <team>/skills/<skill-name>/
   const skillFiles = await fg('*/skills/*/SKILL.md', {
     cwd: homeRepo,
     absolute: true,
-    ignore: ['**/node_modules/**'],
+    ignore: ['**/node_modules/**', ...userIgnores],
   });
 
   const teamsMap = {};
@@ -98,7 +117,7 @@ export async function buildRegistry(homeRepo) {
     const agent = { name, team: teamName, filePath, frontmatter };
     teamsMap[teamName].agents.push(agent);
 
-    if (!teamsMap[teamName].director && (frontmatter.director === 'true' || name === 'picard')) {
+    if (!teamsMap[teamName].director && (frontmatter.director === true || frontmatter.director === 'true' || name === 'picard')) {
       teamsMap[teamName].director = agent;
     }
   }
@@ -128,7 +147,15 @@ export async function buildRegistry(homeRepo) {
     });
   }
 
-  _cache = Object.values(teamsMap);
+  // Sort teams, agents, and skills alphabetically (case-insensitive)
+  const teams = Object.values(teamsMap);
+  teams.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+  for (const team of teams) {
+    team.agents.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    team.skills.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+  }
+
+  _cache = teams;
   return _cache;
 }
 

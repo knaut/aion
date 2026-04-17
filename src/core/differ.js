@@ -3,8 +3,14 @@ import { readFileSync, existsSync } from 'fs';
 import fg from 'fast-glob';
 import { join, basename } from 'path';
 
-function md5(filePath) {
-  return createHash('md5').update(readFileSync(filePath)).digest('hex');
+/** Pure hash function — accepts string or Buffer */
+export function md5(input) {
+  return createHash('md5').update(input).digest('hex');
+}
+
+/** Hash a file's contents */
+function md5File(filePath) {
+  return md5(readFileSync(filePath));
 }
 
 /**
@@ -41,7 +47,7 @@ export async function diffTeam(team, targetDir) {
     const dep = deployedMap[name];
 
     if (src && dep) {
-      const status = md5(src) === md5(dep) ? 'synced' : 'modified';
+      const status = md5File(src) === md5File(dep) ? 'synced' : 'modified';
       results.push({ name: basename(name, '.md'), status });
     } else if (src && !dep) {
       results.push({ name: basename(name, '.md'), status: 'new' });

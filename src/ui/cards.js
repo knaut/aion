@@ -2,7 +2,7 @@ import boxen from 'boxen';
 import { theme } from './theme.js';
 
 // Frontmatter tools can be a comma-separated string or already an array
-function toArray(val) {
+export function toArray(val) {
   if (!val) return [];
   if (Array.isArray(val)) return val;
   return val.split(',').map(s => s.trim()).filter(Boolean);
