@@ -6,6 +6,8 @@
 
 The name is a pun on αἰών — Greek deity of time/eternity, plus *agents on*, plus *ai-on*.
 
+<img width="1054" height="343" alt="Screenshot 2026-04-17 at 11 25 40 AM" src="https://github.com/user-attachments/assets/ab40319c-619d-441d-bdf8-a239c314366b" />
+
 ---
 
 ## Install
