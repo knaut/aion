@@ -31,13 +31,17 @@ export async function diffTeam(team, targetDir) {
     sourceMap[basename(agent.filePath)] = agent.filePath;
   }
 
-  // Build map of deployed agents
-  const deployedFiles = existsSync(agentsDir)
+  // Build map of deployed agents (only those belonging to this team)
+  const allDeployedFiles = existsSync(agentsDir)
     ? await fg('*.md', { cwd: agentsDir, absolute: true })
     : [];
   const deployedMap = {};
-  for (const f of deployedFiles) {
-    deployedMap[basename(f)] = f;
+  for (const f of allDeployedFiles) {
+    const filename = basename(f);
+    // Only include deployed files that match this team's source agents
+    if (sourceMap[filename]) {
+      deployedMap[filename] = f;
+    }
   }
 
   const allNames = new Set([...Object.keys(sourceMap), ...Object.keys(deployedMap)]);
